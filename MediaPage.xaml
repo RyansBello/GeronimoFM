@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<mct:Popup xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+           xmlns:mct="clr-namespace:CommunityToolkit.Maui.Views;assembly=CommunityToolkit.Maui"  
+           x:Class="Geronimo.MediaPage" Color="Transparent">
+    <!--<VerticalStackLayout
+	    Spacing="25"
+	    Padding="30,0"
+	    VerticalOptions="Center" Loaded="VerticalStackLayout_Loaded" Background="Transparent" BackgroundColor="Transparent">
+
+        <HorizontalStackLayout Spacing="10">
+            <Button Text="{Binding Play_Status}" Clicked="Play_Clicked" BackgroundColor="GreenYellow"/>
+        </HorizontalStackLayout>
+
+        <toolkit:MediaElement x:Name="audioMediaElement"
+              IsVisible="False"
+              Source="https://ig.idstreamer.com:8090/live"/>
+    </VerticalStackLayout>-->
+
+    <VerticalStackLayout 
+    Loaded="VerticalStackLayout_Loaded"
+    Padding="20"
+    Spacing="20"
+    VerticalOptions="Center"
+    HorizontalOptions="Center"
+        Background="Transparent" 
+        BackgroundColor="Transparent">
+
+        <toolkit:MediaElement x:Name="audioMediaElement"
+              IsVisible="False"
+        Source="{Binding AudioSource}"/>
+        <Border
+    StrokeThickness="2"
+    Stroke="Red"
+    BackgroundColor="Transparent"
+    HorizontalOptions="Center"
+    VerticalOptions="Center"
+    WidthRequest="80"
+    HeightRequest="80"
+    StrokeShape="RoundRectangle 60">
+
+            <Image
+        Source="icon.jpeg"
+        Aspect="AspectFill"
+        WidthRequest="80"
+        HeightRequest="80" />
+        </Border>
+        <Label Text="Geronimo FM Live Streaming" TextColor="White" FontSize="20" VerticalOptions="Center" HorizontalOptions="Center"></Label>
+        <Button 
+        Text="{Binding Play_Status}"
+        Clicked="Play_Clicked"
+        BackgroundColor="{Binding ButtonColor}"
+        TextColor="White"
+        FontSize="20"
+        WidthRequest="{OnPlatform Android=250, iOS=250}"
+        HorizontalOptions="Center"
+        Padding="15,10"
+        CornerRadius="10"/>
+    </VerticalStackLayout>
+</mct:Popup>
