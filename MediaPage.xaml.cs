@@ -51,6 +51,7 @@ public partial class MediaPage : INotifyPropertyChanged
     public MediaPage()
     {
         InitializeComponent();
+        CanBeDismissedByTappingOutsideOfPopup = false;
         AudioSource = LinkStream.LinkStream.GetLinkStream(); // gunakan properti AudioSource
         BindingContext = this;
     }
