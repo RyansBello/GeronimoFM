@@ -4,19 +4,6 @@
              xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
            xmlns:mct="clr-namespace:CommunityToolkit.Maui.Views;assembly=CommunityToolkit.Maui"  
            x:Class="Geronimo.MediaPage" Color="Transparent">
-    <!--<VerticalStackLayout
-	    Spacing="25"
-	    Padding="30,0"
-	    VerticalOptions="Center" Loaded="VerticalStackLayout_Loaded" Background="Transparent" BackgroundColor="Transparent">
-
-        <HorizontalStackLayout Spacing="10">
-            <Button Text="{Binding Play_Status}" Clicked="Play_Clicked" BackgroundColor="GreenYellow"/>
-        </HorizontalStackLayout>
-
-        <toolkit:MediaElement x:Name="audioMediaElement"
-              IsVisible="False"
-              Source="https://ig.idstreamer.com:8090/live"/>
-    </VerticalStackLayout>-->
 
     <VerticalStackLayout 
     Loaded="VerticalStackLayout_Loaded"
@@ -57,5 +44,36 @@
         HorizontalOptions="Center"
         Padding="15,10"
         CornerRadius="10"/>
+        <Grid
+    Padding="1,1,1,1"
+    BackgroundColor="Transparent"
+    HorizontalOptions="Center">
+            <Grid BackgroundColor="White" HeightRequest="25" WidthRequest="250">
+                <Grid.Clip>
+                    <RoundRectangleGeometry CornerRadius="10" Rect="0,0,250,25" />
+                </Grid.Clip>
+                <Label x:Name="lblVolume"
+            BackgroundColor="Gray"
+            HorizontalOptions="Start"
+            HorizontalTextAlignment="Center"
+            Text="||"
+            TextColor="White"
+            VerticalTextAlignment="Center"
+            WidthRequest="40" />
+                
+                <Slider
+                    x:Name="slider"
+            HorizontalOptions="Fill"
+            Maximum="1.0"
+            Minimum="0.0"
+            Margin="0,0,0,0"
+            Opacity="0"
+            VerticalOptions="Fill" 
+                    Value="{Binding Volume}"
+                    ValueChanged="slider_ValueChanged"/>
+            </Grid>            
+        </Grid>
+        <Label x:Name="indVolume" HorizontalOptions="Start" TextColor="White"></Label>
+
     </VerticalStackLayout>
 </mct:Popup>

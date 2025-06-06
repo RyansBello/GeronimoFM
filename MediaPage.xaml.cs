@@ -9,6 +9,51 @@ public partial class MediaPage : INotifyPropertyChanged
     private Color buttonColor = Colors.YellowGreen;
     private string audioSource;
 
+    public int ConVolume
+    {
+        get 
+        {
+            if (lblVolume != null)
+            {
+                return (int)(audioMediaElement.Volume * 100);
+            }
+            else return 100;
+        }
+
+        set
+        {
+            if (audioMediaElement != null && audioMediaElement.Volume != value)
+            {
+                OnPropertyChanged(nameof(ConVolume));
+            }
+        }
+    }
+
+    public double Volume
+    {
+        get
+        {
+            if (audioSource != null)
+            {               
+                return audioMediaElement.Volume;
+            }
+            else return 1;
+        }
+        set
+        {
+            bool setFlag = false;            
+            if (audioMediaElement != null && audioMediaElement.Volume != value)
+            {
+                audioMediaElement.Volume = value;
+                setFlag = true;
+            }
+            if (setFlag)
+            { 
+                OnPropertyChanged(nameof(Volume));
+            }
+        }
+    }
+
     public string Play_Status
     {
         get => play_Status;
@@ -87,5 +132,22 @@ public partial class MediaPage : INotifyPropertyChanged
     protected void OnPropertyChanged([CallerMemberName] string name = null)
     {
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+    }
+
+    private void slider_ValueChanged(object sender, ValueChangedEventArgs e)
+    {
+        // Konversi dari nilai slider (0.0 - 1.0) ke posisi X (misalnya antara 0 dan 210)
+        double maxX = 210; // Total width container (250) - width label (40)
+        double newX = e.NewValue * maxX;
+
+        lblVolume.TranslationX = newX;
+
+        // Update volume audio
+        if (audioMediaElement != null)
+        {
+            audioMediaElement.Volume = e.NewValue;
+        }
+
+        indVolume.Text = $"Volume : 🔊 {(int)(e.NewValue * 100)} %";
     }
 }
