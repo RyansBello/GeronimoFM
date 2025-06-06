@@ -7,9 +7,14 @@
 
 <div class="radio-player">
     <span class="logo-container">
-        <img src="geronimo.jpeg" alt="Geronimo FM" height="45" width="45" />
+        <img src="geronimo.jpeg" alt="Geronimo FM" height="40" width="40" />
     </span>
     <button @onclick="TogglePlay">@statusPlay</button>
+</div>
+<div class="volume-control">
+    <label for="volume"><small>Volume 🔊 :</small></label>
+    <input id="volume" type="range" min="0" max="1" step="0.01" value="1"
+           @oninput="OnVolumeChanged" />
 </div>
 
 <audio id="geronimoAudio">
@@ -50,6 +55,14 @@
         
 
         await App.Current.MainPage.ShowPopupAsync(new MediaPage());
+    }
+
+    private async Task OnVolumeChanged(ChangeEventArgs e)
+    {
+        if (double.TryParse(e.Value?.ToString(), out double volume))
+        {
+            await JS.InvokeVoidAsync("setVolume", volume);
+        }
     }
 }
 
@@ -113,4 +126,15 @@
             .radio-player button:hover {
                 background: #388e3c;
             }
+
+.volume-control {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-left: 10px;
+}
+
+.volume-control input[type="range"] {
+    width: 100px;
+}
 </style>

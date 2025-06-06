@@ -58,8 +58,8 @@ namespace Geronimo
                         var appWindow = AppWindow.GetFromWindowId(windowId);
 
                         // Atur ukuran jendela
-                        int width = 475;
-                        int height = 275;
+                        int width = 480;
+                        int height = 280;
 
                         // Ambil informasi layar
                         var displayArea = DisplayArea.GetFromWindowId(windowId, DisplayAreaFallback.Primary);
