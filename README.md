@@ -5,8 +5,6 @@ Built with .NET MAUI Blazor Hybrid, this app supports Android and Windows, featu
 
 🔊 Background audio streaming
 
-🎛️ System tray control (play, pause, close)
-
 📱 Native feel with cross-platform UI
 
 🆓 100% open-source
