@@ -8,15 +8,16 @@
     <VerticalStackLayout 
     Loaded="VerticalStackLayout_Loaded"
     Padding="20"
-    Spacing="20"
+    Spacing="10"
     VerticalOptions="Center"
     HorizontalOptions="Center"
         Background="Transparent" 
         BackgroundColor="Transparent">
 
         <toolkit:MediaElement x:Name="audioMediaElement"
-              IsVisible="False"
-        Source="{Binding AudioSource}"/>
+        Source="{Binding AudioSource}"
+        MetadataArtist="{Binding MetaArtist, Mode=OneWay}"
+        MetadataTitle="{Binding MetaTitle, Mode=OneWay}"/>
         <Border
     StrokeThickness="2"
     Stroke="Red"
@@ -74,6 +75,7 @@
             </Grid>            
         </Grid>
         <Label x:Name="indVolume" HorizontalOptions="Start" TextColor="White"></Label>
-
+        <Label Text="Now Playing :" TextColor="White" FontSize="10" VerticalOptions="Center" HorizontalOptions="Center"></Label>
+        <Label x:Name="lblNowPlaying" TextColor="White" FontSize="15" VerticalOptions="Center" HorizontalOptions="Center"></Label>
     </VerticalStackLayout>
 </mct:Popup>

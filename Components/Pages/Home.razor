@@ -1,21 +1,38 @@
 ﻿@page "/"
 @using CommunityToolkit.Maui.Views
 @using Geronimo.LinkStream
+@using System.Text
+@using System.Security.Cryptography
+@inject HttpClient Http
 @inject IJSRuntime JS
+@using System.Net.Http;
+@using System.Net.Http.Headers;
+@using System.Text.Json;
+@using System.Text.Json.Serialization
 
 <small><strong>Geronimo FM Streaming</strong></small>
 
 <div class="radio-player">
     <span class="logo-container">
-        <img src="geronimo.jpeg" alt="Geronimo FM" height="40" width="40" />
+        <img src="geronimo.jpeg" alt="Geronimo FM" height="35" width="35" />
     </span>
-    <button @onclick="TogglePlay">@statusPlay</button>
+    <button @onclick="TogglePlay">@statusPlay</button> 
+
+
 </div>
-<div class="volume-control">
-    <label for="volume"><small>Volume 🔊 :</small></label>
-    <input id="volume" type="range" min="0" max="1" step="0.01" value="1"
-           @oninput="OnVolumeChanged" />
-</div>
+
+@if (isDesktop)
+{
+    <div class="volume-control">
+        <label for="volume"><small>Volume 🔊 :</small></label>
+        <input id="volume" type="range" min="0" max="1" step="0.01" value="1"
+        @oninput="OnVolumeChanged" />
+    </div>
+    <div class="marquee">
+        <p>@dataArtist</p>
+    </div>
+}
+
 
 <audio id="geronimoAudio">
     <source src="@linkStream" type="audio/mpeg" />
@@ -26,11 +43,59 @@
     private bool isPlaying = false;
     string statusPlay = "▶️ Streaming";
     string linkStream = LinkStream.GetLinkStream();
+    bool isDesktop = false;
+    string dataArtist = string.Empty;
+    private HttpClient _httpClient;
+    private bool _isPlaying = false;
+
+    public class Artist
+    {
+        [JsonPropertyName("name")]
+        public string Name { get; set; }
+    }
+
+    public class Album
+    {
+        [JsonPropertyName("name")]
+        public string Name { get; set; }
+    }
+
+    public class MusicItem
+    {
+        [JsonPropertyName("title")]
+        public string Title { get; set; }
+
+        [JsonPropertyName("album")]
+        public Album Album { get; set; }
+
+        [JsonPropertyName("artists")]
+        public List<Artist> Artists { get; set; }
+    }
+
+    public class Metadata
+    {
+        [JsonPropertyName("music")]
+        public List<MusicItem> Music { get; set; }
+    }
+
+    public class DataItem
+    {
+        [JsonPropertyName("metadata")]
+        public Metadata Metadata { get; set; }
+    }
+
+    public class Root
+    {
+        [JsonPropertyName("data")]
+        public List<DataItem> Data { get; set; }
+    }
+
 
     protected override async Task OnInitializedAsync()
     {
         #if WINDOWS
-        statusPlay = "▶️ Play";
+        isDesktop = true;
+        statusPlay = "▶️ Play"; 
         #endif
     }
 
@@ -43,11 +108,13 @@
         {
             statusPlay = "⏹️ Stop";
             await JS.InvokeVoidAsync("playRadio");
+            await StartAutoRefreshLoop();
         }
         else
         {
             statusPlay = "▶️ Play";
             await JS.InvokeVoidAsync("pauseRadio");
+            _isPlaying = false;
         }
 
         return;
@@ -57,11 +124,59 @@
         await App.Current.MainPage.ShowPopupAsync(new MediaPage());
     }
 
+    
+
+    private async Task StartAutoRefreshLoop()
+    {
+        _isPlaying = true;
+
+        while (_isPlaying)
+        {
+            await GetSongInfoAsync();
+            StateHasChanged();
+            await Task.Delay(5000); // delay 5 seconds
+        }
+    }
+
     private async Task OnVolumeChanged(ChangeEventArgs e)
     {
         if (double.TryParse(e.Value?.ToString(), out double volume))
         {
             await JS.InvokeVoidAsync("setVolume", volume);
+        }
+    }
+
+    public async Task GetSongInfoAsync()
+    {
+        try
+        {
+            var url = "https://api-v2.acrcloud.com/api/bm-cs-projects/16166/streams/s-UShnaIBQ/results?type=last";
+            var token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJhdWQiOiI3IiwianRpIjoiNjE1OTg5ODA0MjhhZWMxZWM2YTMxZTU4Nzg1MDMyMzA4NmRhY2ZiYTA0ZjQ3NjhhNWVmMTY0ZWU2ZDllNjRjMjhjZGJmMTZjMjNiYmU2MWEiLCJpYXQiOjE3NDkyNTkzODAuMzIzMjgzLCJuYmYiOjE3NDkyNTkzODAuMzIzMjg1LCJleHAiOjIwNjQ3OTIxNzguMDcyODEsInN1YiI6IjIzNDU5NSIsInNjb3BlcyI6WyJibS1wcm9qZWN0cyIsImJtLWNzLXByb2plY3RzIiwid3JpdGUtYm0tY3MtcHJvamVjdHMiLCJyZWFkLWJtLWNzLXByb2plY3RzIiwiYm0tYmQtcHJvamVjdHMiLCJ3cml0ZS1ibS1iZC1wcm9qZWN0cyIsInJlYWQtYm0tYmQtcHJvamVjdHMiXX0.iQSnDieGik7fV80WwNmivyu9upayKvUmR-dp9wJD_zaY7ZmPCGjqC8J4q3l-gQZuV6kswVDOpzQQoyM-76Fug4hTMU1fL4k5OdCgHkKWyKVOB9XhphghdHm2xUzuK5WULOmmbdjkSJkuYw6Pqr2h9HRBCheKEm_0FgLVImQiXej--wBL-rWIrWiV2cUaewlVvaFNcvIY_HLr81AIEw9BpOpeGbvMa7U2yJi6gZS-DveDbQOF3NFs8cQXmXi0Bnv-nK4Fc86tI0To8dRX4u-MwPdPVNG3UbxB65FmbQwQIKmR5xR6o7u-uiUjjBI4cPt3lYAUJiPqAItgxVJtrpsjf1t8AYmSurMz5HrpDmB4PRfjaLbLjSkggHNLkWo1FEWtO1Tb-dJIGToZAcVQsTySObbQNpppObuhw6zu7tzXtbVvDtwoXAFVOOAwfUSMN6slCc5EbHsc-6r1CZwmv4WaOAeBEY40d3geMca0RO0o0718jNjpnAidZua7QDQd7bF-8Ns5o-Q-HkxiN7dpxlKZQgxNQ7KN77jiwubu4sBsYyJi1sm97DPMTKhpUBvBLMlSST3Zji8Aysi95Y1ZNOWKtMpvyiQ0qiWBtbgU7WhgXREHStHMQL-Kh3NWakSBaOTkGkqRSd6xSQTfXAgr6tVPEw-9R9f8aYtmpXmd1RgS1I4"; // token dipersingkat
+
+            using var http = new HttpClient();
+            http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            http.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+            var response = await http.GetAsync(url);
+            response.EnsureSuccessStatusCode();
+
+            var json = await response.Content.ReadAsStringAsync();
+            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+            var result = JsonSerializer.Deserialize<Root>(json, options);
+            var music = result?.Data?.FirstOrDefault()?.Metadata?.Music?.FirstOrDefault();
+
+            if (music != null)
+            {
+                var artistName = music.Artists?.FirstOrDefault()?.Name;
+                var title = music.Title;
+                var albumName = music.Album?.Name;
+
+                dataArtist = $"{artistName} - {title}";
+            }
+        }
+        catch (Exception ex)
+        {
+            dataArtist = $"Error: {ex.Message}";
         }
     }
 }
@@ -137,4 +252,51 @@
 .volume-control input[type="range"] {
     width: 100px;
 }
+
+.marquee {
+ height: 20px;	
+ overflow: hidden;
+ position: relative;
+ background: black;
+ color: white;
+ border: 1px solid orange;
+}
+.marquee p {
+ position: absolute;
+ width: 100%;
+ margin: 0;
+ line-height: 20px;
+ font-size : 10px;
+ text-align: center;
+ /* Starting position */
+ -moz-transform:translateX(100%);
+ -webkit-transform:translateX(100%);	
+ transform:translateX(100%);
+ /* Apply animation to this element */	
+ -moz-animation: scroll-left 15s linear infinite;
+ -webkit-animation: scroll-left 15s linear infinite;
+ animation: scroll-left 15s linear infinite;
+}
+/* Move it (define the animation) */
+@@-moz-keyframes scroll-left {
+ 0%   { -moz-transform: translateX(100%); }
+ 100% { -moz-transform: translateX(-100%); }
+}
+@@-webkit-keyframes scroll-left {
+ 0%   { -webkit-transform: translateX(100%); }
+ 100% { -webkit-transform: translateX(-100%); }
+}
+@@keyframes scroll-left {
+ 0%   { 
+ -moz-transform: translateX(100%); /* Browser bug fix */
+ -webkit-transform: translateX(100%); /* Browser bug fix */
+ transform: translateX(100%); 		
+ }
+ 100% { 
+ -moz-transform: translateX(-100%); /* Browser bug fix */
+ -webkit-transform: translateX(-100%); /* Browser bug fix */
+ transform: translateX(-100%); 
+ }
+}
+
 </style>

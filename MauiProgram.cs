@@ -40,6 +40,7 @@ namespace Geronimo
                 });
 
             builder.Services.AddMauiBlazorWebView();
+            builder.Services.AddScoped(sp => new HttpClient { });
             builder.Services.AddSingleton<INavigation>(sp =>
             {
                 var navigationPage = new NavigationPage(new MainPage());
@@ -58,8 +59,8 @@ namespace Geronimo
                         var appWindow = AppWindow.GetFromWindowId(windowId);
 
                         // Atur ukuran jendela
-                        int width = 480;
-                        int height = 280;
+                        int width = 420;
+                        int height = 320;
 
                         // Ambil informasi layar
                         var displayArea = DisplayArea.GetFromWindowId(windowId, DisplayAreaFallback.Primary);
